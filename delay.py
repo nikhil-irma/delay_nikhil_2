@@ -4,7 +4,7 @@ import joblib
 
 # Load the trained model
 filename = r'logi.sav'
-loaded_model = joblib.load(open(filename, 'rb'))
+loaded_model = joblib.load(open(filename, 'logi'))
 
 # Define the correct column names
 columns = ['Delivery_Distance', 'Traffic_Congestion', 'Weather_Condition',
