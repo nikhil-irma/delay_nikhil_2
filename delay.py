@@ -1,13 +1,35 @@
 import streamlit as st
 import pandas as pd
 import joblib
+import pickle
+import os
 
 # -----------------------------------
 # LOAD TRAINED MODEL
 # -----------------------------------
 
 filename = "logi.sav"
-loaded_model = joblib.load(filename)
+
+if not os.path.exists(filename):
+    st.error("❌ Model file 'logi.sav' was not found.")
+    st.stop()
+
+try:
+    loaded_model = joblib.load(filename)
+
+except Exception as joblib_error:
+
+    try:
+        with open(filename, "rb") as file:
+            loaded_model = pickle.load(file)
+
+    except Exception as pickle_error:
+
+        st.error("❌ Unable to load the model file 'logi.sav'.")
+        st.write("The file exists, but the saved model is incompatible or corrupted.")
+        st.write("Joblib error:", str(joblib_error))
+        st.write("Pickle error:", str(pickle_error))
+        st.stop()
 
 
 # -----------------------------------
@@ -30,16 +52,19 @@ columns = [
 
 
 # -----------------------------------
-# STREAMLIT APP
+# APP TITLE
 # -----------------------------------
 
 st.title("🚚 Delivery Delay Prediction")
 
-st.write("Enter the delivery details below to predict whether a significant delivery delay is expected.")
+st.write(
+    "Enter the delivery details below to predict whether "
+    "a significant delivery delay is expected."
+)
 
 
 # -----------------------------------
-# USER INPUTS
+# USER INPUT
 # -----------------------------------
 
 Delivery_Distance = st.number_input(
@@ -150,14 +175,12 @@ if st.button("🔮 Predict Delivery Delay"):
         prediction = loaded_model.predict(input_data)
 
         if prediction[0] == 0:
-
             st.success(
                 "✅ Predicted Delivery Delay: 0\n\n"
                 "No significant delay expected."
             )
 
         else:
-
             st.error(
                 "⚠️ Predicted Delivery Delay: 1\n\n"
                 "Delivery delay expected."
@@ -165,5 +188,5 @@ if st.button("🔮 Predict Delivery Delay"):
 
     except Exception as e:
 
-        st.error("An error occurred while making the prediction.")
-        st.write(e)
+        st.error("❌ Error while making prediction.")
+        st.write(str(e))
